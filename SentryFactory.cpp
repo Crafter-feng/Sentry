@@ -36,7 +36,7 @@ int SentryFactory_FreeVisionBuffer(SentryFactory *factory, int vision_type)
   return 1;
 }
 
-void SentryFactory_Init(SentryFactory *factory, uint32_t address, uint8_t device_id,
+void SentryFactory_Init(SentryFactory *factory, uint8_t address, uint8_t device_id,
                         sentry_vision_state_t **vision_state, int vision_max_type,
                         int vision_qrcode_type)
 {
@@ -45,7 +45,7 @@ void SentryFactory_Init(SentryFactory *factory, uint32_t address, uint8_t device
   factory->vision_max_type = vision_max_type;
   factory->vision_qrcode_type = vision_qrcode_type;
   factory->vision_state = vision_state;
-  factory->mode = 0;
+  factory->mode = kUnknownMode;
   factory->img_w = 0;
   factory->img_h = 0;
   factory->qrcode_state = NULL;
@@ -143,7 +143,6 @@ uint8_t SentryFactory_SensorInit(SentryFactory *factory, int set_default)
 uint8_t SentryFactory_Begin(SentryFactory *factory, sentry_mode_e mode, int set_default)
 {
   sentry_err_t err = SENTRY_OK;
-
   if (factory->mode == mode)
   {
     return SENTRY_OK;
@@ -165,10 +164,12 @@ uint8_t SentryFactory_Begin(SentryFactory *factory, sentry_mode_e mode, int set_
     return err;
   }
 
+  factory->mode = mode;
+
   return err;
 }
 
-uint8_t SentryFactory_SentryFactory_VisionSetStatus(SentryFactory *factory, int vision_type, int enable)
+uint8_t SentryFactory_VisionSetStatus(SentryFactory *factory, int vision_type, int enable)
 {
   sentry_err_t err;
   sentry_vision_conf1_t vision_config1;

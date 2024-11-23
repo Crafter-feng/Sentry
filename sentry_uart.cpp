@@ -1,5 +1,4 @@
 #include "sentry_uart.h"
-#include "debug_tool.h"
 
 #define SENTRY_PROTOC_OK 0xE0
 #define SENTRY_PROTOC_FAIL 0xE1
@@ -160,7 +159,7 @@ static int writepkg(pkg_t *pkg)
 }
 
 // 实现函数
-static sentry_err_t sentry_uart_get(uint32_t address, const uint8_t reg_address, uint8_t *value)
+static sentry_err_t sentry_uart_get(uint8_t address, const uint8_t reg_address, uint8_t *value)
 {
     pkg_t pkg = {3, {address, SENTRY_PROTOC_COMMADN_GET, reg_address}};
     sentry_err_t err;
@@ -196,7 +195,7 @@ static sentry_err_t sentry_uart_get(uint32_t address, const uint8_t reg_address,
     return SENTRY_OK;
 }
 
-static sentry_err_t sentry_uart_set(uint32_t address, const uint8_t reg_address, const uint8_t value)
+static sentry_err_t sentry_uart_set(uint8_t address, const uint8_t reg_address, const uint8_t value)
 {
     pkg_t pkg = {4, {address, SENTRY_PROTOC_COMMADN_SET, reg_address, value}};
     sentry_err_t err;
@@ -232,7 +231,7 @@ static sentry_err_t sentry_uart_set(uint32_t address, const uint8_t reg_address,
     return SENTRY_OK;
 }
 
-static sentry_err_t sentry_uart_set_param(uint32_t address, int vision_type, sentry_object_t *param, int param_id)
+static sentry_err_t sentry_uart_set_param(uint8_t address, int vision_type, sentry_object_t *param, int param_id)
 {
     sentry_err_t err = SENTRY_OK;
     int try_time = 0;
@@ -290,7 +289,7 @@ static sentry_err_t sentry_uart_set_param(uint32_t address, int vision_type, sen
     return err;
 }
 
-static sentry_err_t sentry_uart_read(uint32_t address, int vision_type, sentry_vision_state_t *vision_state)
+static sentry_err_t sentry_uart_read(uint8_t address, int vision_type, sentry_vision_state_t *vision_state)
 {
     int try_time = 0;
     sentry_err_t err = SENTRY_OK;
@@ -356,7 +355,7 @@ static sentry_err_t sentry_uart_read(uint32_t address, int vision_type, sentry_v
     return SENTRY_OK;
 }
 
-static sentry_err_t sentry_uart_read_qrcode(uint32_t address, int vision_type, sentry_qrcode_state_t *qrcode)
+static sentry_err_t sentry_uart_read_qrcode(uint8_t address, int vision_type, sentry_qrcode_state_t *qrcode)
 {
     int try_time = 0;
     sentry_err_t err = SENTRY_OK;
@@ -418,7 +417,7 @@ static sentry_err_t sentry_uart_read_qrcode(uint32_t address, int vision_type, s
     return SENTRY_OK;
 }
 
-static sentry_err_t sentry_uart_write(uint32_t address, int vision_type, const sentry_vision_state_t *vision_state)
+static sentry_err_t sentry_uart_write(uint8_t address, int vision_type, const sentry_vision_state_t *vision_state)
 {
     sentry_err_t err = SENTRY_OK;
     pkg_t pkg;

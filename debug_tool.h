@@ -39,7 +39,7 @@
     {                                                                     \
         char buffer[300];                                              \
         int written = snprintf((char*)buffer, sizeof(buffer), s, ##__VA_ARGS__); \
-        Serial.println(buffer);                               \
+        Serial.print(buffer);                               \
     } while (0)
 #endif
 

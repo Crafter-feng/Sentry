@@ -1,11 +1,10 @@
 #include "sentry_i2c.h"
-#include "debug_tool.h"
 
 #ifndef MICRO_BIT
-extern uint32_t I2CRead(uint32_t address, uint8_t reg_address, uint8_t *temp);
-extern uint32_t I2CWrite(uint32_t address, uint8_t reg_address, uint8_t value);
+extern uint32_t I2CRead(uint8_t address, uint8_t reg_address, uint8_t *temp);
+extern uint32_t I2CWrite(uint8_t address, uint8_t reg_address, uint8_t value);
 #else
-uint32_t I2CRead(uint32_t address, uint8_t reg_address, uint8_t *temp)
+uint32_t I2CRead(uint8_t address, uint8_t reg_address, uint8_t *temp)
 {
   uBit.i2c.write(address << 1, (BUFFER_TYPE)&reg_address, 1, false);
   // Debug Output
@@ -20,7 +19,7 @@ uint32_t I2CRead(uint32_t address, uint8_t reg_address, uint8_t *temp)
   return SENTRY_OK;
 }
 
-uint32_t I2CWrite(uint32_t address, uint8_t reg_address, uint8_t value)
+uint32_t I2CWrite(uint8_t address, uint8_t reg_address, uint8_t value)
 {
   uint8_t buff[2] = {reg_address, value};
 
@@ -34,17 +33,17 @@ uint32_t I2CWrite(uint32_t address, uint8_t reg_address, uint8_t value)
 }
 #endif
 
-static sentry_err_t sentry_i2c_get(uint32_t address, const uint8_t reg_address, uint8_t *value)
+static sentry_err_t sentry_i2c_get(uint8_t address, const uint8_t reg_address, uint8_t *value)
 {
   return I2CRead(address, reg_address, value);
 }
 
-static sentry_err_t sentry_i2c_set(uint32_t address, const uint8_t reg_address, const uint8_t value)
+static sentry_err_t sentry_i2c_set(uint8_t address, const uint8_t reg_address, const uint8_t value)
 {
   return I2CWrite(address, reg_address, value);
 }
 
-static sentry_err_t sentry_i2c_read(uint32_t address, int vision_type, sentry_vision_state_t *vision_state)
+static sentry_err_t sentry_i2c_read(uint8_t address, int vision_type, sentry_vision_state_t *vision_state)
 {
   sentry_err_t err;
   uint8_t result_data_tmp[2];
@@ -91,7 +90,7 @@ static sentry_err_t sentry_i2c_read(uint32_t address, int vision_type, sentry_vi
   return SENTRY_OK;
 }
 
-static sentry_err_t sentry_i2c_set_param(uint32_t address, int vision_type, sentry_object_t *param, int param_id)
+static sentry_err_t sentry_i2c_set_param(uint8_t address, int vision_type, sentry_object_t *param, int param_id)
 {
   sentry_err_t err;
   uint8_t result_data_tmp[2];
@@ -116,7 +115,7 @@ static sentry_err_t sentry_i2c_set_param(uint32_t address, int vision_type, sent
   return SENTRY_OK;
 }
 
-static sentry_err_t sentry_i2c_read_qrcode(uint32_t address, int vision_type, sentry_qrcode_state_t *qrcode)
+static sentry_err_t sentry_i2c_read_qrcode(uint8_t address, int vision_type, sentry_qrcode_state_t *qrcode)
 {
   sentry_err_t err;
   uint8_t result_data_tmp[2];
@@ -171,7 +170,7 @@ static sentry_err_t sentry_i2c_read_qrcode(uint32_t address, int vision_type, se
   return SENTRY_OK;
 }
 
-static sentry_err_t sentry_i2c_write(uint32_t address, int vision_type, const sentry_vision_state_t *vision_state)
+static sentry_err_t sentry_i2c_write(uint8_t address, int vision_type, const sentry_vision_state_t *vision_state)
 {
   sentry_err_t err = SENTRY_OK;
 

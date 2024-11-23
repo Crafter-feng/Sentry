@@ -15,20 +15,21 @@
 #ifndef SENTRY_STREAM_H
 #define SENTRY_STREAM_H
 #include "sentry_type.h"
+#include "debug_tool.h"
 
 typedef struct
 {
-    sentry_err_t (*Get)(uint32_t address, const uint8_t reg_address, uint8_t *value);
-    sentry_err_t (*Set)(uint32_t address, const uint8_t reg_address, const uint8_t value);
-    sentry_err_t (*SetParam)(uint32_t address, int vision_type, sentry_object_t *param, int param_id);
-    sentry_err_t (*Read)(uint32_t address, int vision_type, sentry_vision_state_t *vision_state);
-    sentry_err_t (*ReadQrCode)(uint32_t address, int vision_type, sentry_qrcode_state_t *qrcode);
-    sentry_err_t (*Write)(uint32_t address, int vision_type, const sentry_vision_state_t *vision_state);
+    sentry_err_t (*Get)(uint8_t address, const uint8_t reg_address, uint8_t *value);
+    sentry_err_t (*Set)(uint8_t address, const uint8_t reg_address, const uint8_t value);
+    sentry_err_t (*SetParam)(uint8_t address, int vision_type, sentry_object_t *param, int param_id);
+    sentry_err_t (*Read)(uint8_t address, int vision_type, sentry_vision_state_t *vision_state);
+    sentry_err_t (*ReadQrCode)(uint8_t address, int vision_type, sentry_qrcode_state_t *qrcode);
+    sentry_err_t (*Write)(uint8_t address, int vision_type, const sentry_vision_state_t *vision_state);
 }sentry_stream_base_t;
 
 typedef struct
 {
-    uint32_t address;
+    uint8_t address;
     sentry_stream_base_t base;
 }sentry_stream_t;
 

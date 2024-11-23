@@ -22,7 +22,7 @@
 class Sentry2
 {
 public:
-    Sentry2(uint32_t address = 0x60)
+    Sentry2(uint8_t address = 0x60)
     {
         SentryFactory_Init(&factory, address, SENTRY2_DEVICE_ID, product_vision_state_,
                            int(kVisionMaxType), int(kVisionQrCode));
@@ -243,6 +243,12 @@ public:
     {
         return Sentry_Stream_SetParam(factory.stream, (int)vision_type, param, param_id);
     }
+
+    uint8_t VisionSetMode(int vision_type, int mode)
+    {
+        return SentryFactory_VisionSetMode(&factory, vision_type, mode);
+    }
+
     /**
      * @brief  get vision result data, this function will update vision
      *         result automatically.
@@ -256,9 +262,30 @@ public:
         return SentryFactory_GetValue(&factory, (int)vision_type, obj_info, obj_id);
     }
 
+    char *GetQrCodeValue()
+    {
+        if (factory.qrcode_state)
+        {
+            return factory.qrcode_state->qrcode_result[0].str;
+        }
+        return NULL;
+    }
+
     uint8_t VisionSetDefault(sentry_vision_e vision_type)
     {
         return SentryFactory_VisionSetDefault(&factory, (int)vision_type);
+    }
+
+    uint8_t LedSetColor(sentry_led_color_e detected_color,
+                        sentry_led_color_e undetected_color,
+                        uint8_t level = 1)
+    {
+        return SentryFactory_LedSetColor(&factory, detected_color, undetected_color, level);
+    }
+
+    uint8_t CameraSetAwb(sentry_camera_white_balance_e awb)
+    {
+        return SentryFactory_CameraSetAwb(&factory, awb);
     }
 
 private:

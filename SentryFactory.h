@@ -19,7 +19,7 @@
 #include "sentry_uart.h"
 
 typedef struct {
-    uint32_t address;
+    uint8_t address;
     uint8_t device_id;
     int vision_max_type;
     int vision_qrcode_type;
@@ -31,7 +31,7 @@ typedef struct {
     sentry_qrcode_state_t *qrcode_state;
 } SentryFactory;
 
-void SentryFactory_Init(SentryFactory *factory, uint32_t address, uint8_t device_id,
+void SentryFactory_Init(SentryFactory *factory, uint8_t address, uint8_t device_id,
                         sentry_vision_state_t **vision_state, int vision_max_type,
                         int vision_qrcode_type);
 
