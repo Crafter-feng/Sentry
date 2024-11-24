@@ -60,7 +60,7 @@ void sentry_serial_write(const uint8_t *pkg_b, int len) {
 
 static int readpkg(pkg_t *pkg, int timeout) {
   int start_receive = 0;
-  int timeout_t = timeout + 5;
+  int timeout_t = timeout;
   int index = 0;
 
   memset(pkg, 0, sizeof(pkg_t));
@@ -79,6 +79,8 @@ static int readpkg(pkg_t *pkg, int timeout) {
       index = 0;
       if (!sentry_serial_read(&pkg->buf[index], 1)) {
         continue;
+      } else {
+        timeout_t = timeout;
       }
     }
 
@@ -109,8 +111,8 @@ static int readpkg(pkg_t *pkg, int timeout) {
 
     if (start_receive) {
       index++;
-      if (!sentry_serial_read(&pkg->buf[index], 1)) {
-        break;
+      if (sentry_serial_read(&pkg->buf[index], 1)) {
+        timeout_t = timeout;
       }
     }
 
@@ -268,6 +270,13 @@ static sentry_err_t sentry_uart_read(uint8_t address, int vision_type, sentry_vi
       return SENTRY_READ_TIMEOUT;
     }
     if (pkg.len > 0) {
+#if SENTRY_DEBUG_ENABLE && LOG_OUTPUT
+      DOPRINTF("pkg_r[%d]", pkg.len);
+      for (unsigned int i = 0; i < pkg.len; ++i) {
+        DOPRINTF("%02x ", pkg.buf[i]);
+      }
+      DOPRINTF("\n");
+#endif
       if (pkg.buf[0] == SENTRY_PROTOC_OK || pkg.buf[0] == SENTRY_PROTOC_RESULT_NOT_END || pkg.buf[3] == vision_type) {
         if (pkg.buf[1] == SENTRY_PROTOC_GET_RESULT) {
           vision_state->frame = pkg.buf[2];

@@ -65,12 +65,12 @@ void setup()
   Serial1.begin(115200,SERIAL_8N1, 19, 18);
   Serial1.setRxTimeout(1);
   sentry.begin(kSerialMode);
-  sentry.VisionBegin(Sentry2::kVisionQrCode); 
+  sentry.VisionBegin(Sentry2::kVisionLine); 
 }
 
 void loop()
 {
-  cnt = sentry.GetValue(Sentry2::kVisionQrCode, kStatus);
+  cnt = sentry.GetValue(Sentry2::kVisionLine, kStatus);
   DOPRINTF("GetValue=%d\r\n",cnt);
   delay(1000);
 }
