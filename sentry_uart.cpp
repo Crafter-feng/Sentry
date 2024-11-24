@@ -30,20 +30,23 @@ typedef struct _pkg_t {
   uint8_t buf[PROTOCOL_SINGLE_BUFFER_SIZE];
 } pkg_t;
 
-static int serial_read(uint8_t *pkg_b, int len) {
+#ifndef SENTRY_MICRO_BIT
+int sentry_serial_read(uint8_t *pkg_b, int len);
+void sentry_serial_write(const uint8_t *pkg_b, int len);
+#else
+int sentry_serial_read(uint8_t *pkg_b, int len) {
   int ret = 0;
-#ifdef SENTRY_MICRO_BIT
   auto mode = SYNC_SLEEP;
 
   ret = uBit.serial.read(pkg_b, len, mode);
-#else
-  ret = Serial1.readBytes(pkg_b, len);
+
+#if SENTRY_DEBUG_ENABLE && LOG_OUTPUT
   DOPRINTF("R%d %02x\n", ret, pkg_b[0]);
 #endif
   return ret > 0 ? 1 : 0;
 }
 
-static void serial_write(const uint8_t *pkg_b, int len) {
+void sentry_serial_write(const uint8_t *pkg_b, int len) {
 #if SENTRY_DEBUG_ENABLE && LOG_OUTPUT
   DOPRINTF("pkg_b[%d]", len);
   for (unsigned int i = 0; i < len; ++i) {
@@ -51,13 +54,9 @@ static void serial_write(const uint8_t *pkg_b, int len) {
   }
   DOPRINTF("\n");
 #endif
-
-#ifdef SENTRY_MICRO_BIT
   uBit.serial.send((unsigned char *)pkg_b, len);
-#else
-  Serial1.write((unsigned char *)pkg_b, len);
-#endif
 }
+#endif
 
 static int readpkg(pkg_t *pkg, int timeout) {
   int start_receive = 0;
@@ -78,7 +77,7 @@ static int readpkg(pkg_t *pkg, int timeout) {
 
     if (!start_receive) {
       index = 0;
-      if (!serial_read(&pkg->buf[index], 1)) {
+      if (!sentry_serial_read(&pkg->buf[index], 1)) {
         continue;
       }
     }
@@ -110,7 +109,7 @@ static int readpkg(pkg_t *pkg, int timeout) {
 
     if (start_receive) {
       index++;
-      if (!serial_read(&pkg->buf[index], 1)) {
+      if (!sentry_serial_read(&pkg->buf[index], 1)) {
         break;
       }
     }
@@ -141,7 +140,7 @@ static int writepkg(pkg_t *pkg) {
   pkg->buf[pkg->len + 3] = SENTRY_PROTOC_END;
   pkg->len += 4;
 
-  serial_write(pkg->buf, pkg->len);
+  sentry_serial_write(pkg->buf, pkg->len);
 
   return 1;
 }

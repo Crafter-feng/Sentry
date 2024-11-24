@@ -2,15 +2,7 @@
 #include <Wire.h>
 #include "Sentry2.h"
 
-// Serial
-#define PIN_SERIAL_TX (0ul)
-#define PIN_SERIAL_RX (1ul)
-
-// Wire
-#define PIN_WIRE_SDA        (4u)
-#define PIN_WIRE_SCL        (5u)
-
-uint32_t I2CRead(uint8_t address, uint8_t reg_address, uint8_t* temp) {
+uint32_t sentry_i2c_read(uint8_t address, uint8_t reg_address, uint8_t* temp) {
   uint8_t ret = SENTRY_OK;
   Wire.beginTransmission((uint8_t)address);
   ret = Wire.write(reg_address);
@@ -29,7 +21,7 @@ uint32_t I2CRead(uint8_t address, uint8_t reg_address, uint8_t* temp) {
   return SENTRY_OK;
 }
 
-uint32_t I2CWrite(uint8_t address, uint8_t reg_address, uint8_t value) {
+uint32_t sentry_i2c_write(uint8_t address, uint8_t reg_address, uint8_t value) {
   uint8_t ret = SENTRY_OK;
   Wire.beginTransmission((uint8_t)address);
   ret = Wire.write(reg_address);
@@ -42,6 +34,28 @@ uint32_t I2CWrite(uint8_t address, uint8_t reg_address, uint8_t value) {
 
   return SENTRY_OK;
 }
+
+int sentry_serial_read(uint8_t *pkg_b, int len) {
+  int ret = 0;
+  ret = Serial1.readBytes(pkg_b, len);
+#if SENTRY_DEBUG_ENABLE && LOG_OUTPUT
+  DOPRINTF("R%d %02x\n", ret, pkg_b[0]);
+#endif
+  return ret > 0 ? 1 : 0;
+}
+
+void sentry_serial_write(const uint8_t *pkg_b, int len) {
+#if SENTRY_DEBUG_ENABLE && LOG_OUTPUT
+  DOPRINTF("pkg_b[%d]", len);
+  for (unsigned int i = 0; i < len; ++i) {
+    DOPRINTF("%02x ", pkg_b[i]);
+  }
+  DOPRINTF("\n");
+#endif
+
+  Serial1.write((unsigned char *)pkg_b, len);
+}
+
 
 Sentry2 sentry(0x60);
 int cnt = 0;
