@@ -40,11 +40,11 @@ void SentryFactory_Init(SentryFactory *factory, uint8_t address, uint8_t device_
                         sentry_vision_state_t **vision_state, int vision_max_type,
                         int vision_qrcode_type)
 {
-  factory->address = address;
   factory->device_id = device_id;
   factory->vision_max_type = vision_max_type;
   factory->vision_qrcode_type = vision_qrcode_type;
   factory->vision_state = vision_state;
+  factory->stream.address = address;
   factory->mode = kUnknownMode;
   factory->img_w = 0;
   factory->img_h = 0;
@@ -143,6 +143,7 @@ uint8_t SentryFactory_SensorInit(SentryFactory *factory, int set_default)
 uint8_t SentryFactory_Begin(SentryFactory *factory, sentry_mode_e mode, int set_default)
 {
   sentry_err_t err = SENTRY_OK;
+
   if (factory->mode == mode)
   {
     return SENTRY_OK;
@@ -150,12 +151,10 @@ uint8_t SentryFactory_Begin(SentryFactory *factory, sentry_mode_e mode, int set_
   else if (mode == kSerialMode)
   {
     sentry_uart_init(&factory->stream.base);
-    factory->mode = kSerialMode;
   }
   else if (mode == kI2CMode)
   {
     sentry_i2c_init(&factory->stream.base);
-    factory->mode = kI2CMode;
   }
 
   err = SentryFactory_SensorInit(factory, set_default);
@@ -163,7 +162,7 @@ uint8_t SentryFactory_Begin(SentryFactory *factory, sentry_mode_e mode, int set_
   {
     return err;
   }
-
+  
   factory->mode = mode;
 
   return err;
@@ -412,20 +411,6 @@ const sentry_vision_state_t *SentryFactory_GetVisionState(SentryFactory *factory
   return factory->vision_state[vision_type - 1];
 }
 
-uint8_t SentryFactory_SetVisionState(SentryFactory *factory, int vision_type,
-                                     sentry_vision_state_t *state)
-{
-  sentry_err_t err;
-
-  while (SENTRY_OK != SentryFactory_SensorLockReg(factory, 1))
-    ;
-  err = Sentry_Stream_Write(factory->stream, vision_type, state);
-  while (SENTRY_OK != SentryFactory_SensorLockReg(factory, 0))
-    ;
-
-  return err;
-}
-
 uint8_t SentryFactory_VisionSetDefault(SentryFactory *factory, int vision_type)
 {
   sentry_err_t err;
@@ -453,19 +438,6 @@ uint8_t SentryFactory_VisionSetDefault(SentryFactory *factory, int vision_type)
   return SENTRY_OK;
 }
 
-int SentryFactory_VisionGetStatus(SentryFactory *factory, int vision_type)
-{
-  uint16_t vision_status;
-  uint8_t vision_status_l;
-  uint8_t vision_status_h;
-
-  Sentry_Stream_Get(factory->stream, kRegVisionStatus1, &vision_status_l);
-  Sentry_Stream_Get(factory->stream, kRegVisionStatus2, &vision_status_h);
-  vision_status = (vision_status_h << 8) | vision_status_l;
-
-  return (0x01UL << (vision_type - 1)) & vision_status;
-}
-
 uint8_t SentryFactory_VisionSetMode(SentryFactory *factory, int vision_type, int mode)
 {
   sentry_err_t err;
@@ -483,60 +455,6 @@ uint8_t SentryFactory_VisionSetMode(SentryFactory *factory, int vision_type, int
     vision_config2.mode = mode;
     err = Sentry_Stream_Set(factory->stream, kRegVisionConfig2, vision_config2.value);
   }
-  return err;
-}
-
-uint8_t SentryFactory_VisionGetMode(SentryFactory *factory, int vision_type, int *mode)
-{
-  sentry_err_t err;
-  sentry_vision_conf2_t vision_config2;
-
-  err = Sentry_Stream_Set(factory->stream, kRegVisionId, vision_type);
-  if (err)
-    return err;
-  err =
-      Sentry_Stream_Get(factory->stream, kRegVisionConfig2, &vision_config2.value);
-  if (err)
-    return err;
-  *mode = vision_config2.mode;
-  return err;
-}
-
-uint8_t SentryFactory_VisionSetLevel(SentryFactory *factory, int vision_type,
-                                     sentry_vision_level_e level)
-{
-  sentry_err_t err;
-  sentry_vision_conf2_t vision_config2;
-
-  err = Sentry_Stream_Set(factory->stream, kRegVisionId, vision_type);
-  if (err)
-    return err;
-  err =
-      Sentry_Stream_Get(factory->stream, kRegVisionConfig2, &vision_config2.value);
-  if (err)
-    return err;
-  if (vision_config2.level != level)
-  {
-    vision_config2.level = level;
-    err = Sentry_Stream_Set(factory->stream, kRegVisionConfig2, vision_config2.value);
-  }
-  return err;
-}
-
-uint8_t SentryFactory_VisionGetLevel(SentryFactory *factory, int vision_type,
-                                     sentry_vision_level_e *level)
-{
-  sentry_err_t err;
-  sentry_vision_conf2_t vision_config2;
-
-  err = Sentry_Stream_Set(factory->stream, kRegVisionId, vision_type);
-  if (err)
-    return err;
-  err =
-      Sentry_Stream_Get(factory->stream, kRegVisionConfig2, &vision_config2.value);
-  if (err)
-    return err;
-  *level = vision_config2.level;
   return err;
 }
 
@@ -667,19 +585,6 @@ uint8_t SentryFactory_LedSetColor(SentryFactory *factory, sentry_led_color_e det
   return err;
 }
 
-// Camera functions
-uint8_t SentryFactory_CameraSetZoom(SentryFactory *factory, sentry_camera_zoom_e zoom)
-{
-  sentry_camera_conf1_t camera_config1;
-  sentry_err_t err;
-  err = Sentry_Stream_Get(factory->stream, kRegCameraConfig1, &camera_config1.camera_reg_value);
-  if (camera_config1.zoom != zoom)
-  {
-    camera_config1.zoom = zoom;
-    err = Sentry_Stream_Set(factory->stream, kRegCameraConfig1, camera_config1.camera_reg_value);
-  }
-  return err;
-}
 
 uint8_t SentryFactory_CameraSetAwb(SentryFactory *factory, sentry_camera_white_balance_e awb)
 {
@@ -690,207 +595,5 @@ uint8_t SentryFactory_CameraSetAwb(SentryFactory *factory, sentry_camera_white_b
     return err;
   camera_config1.white_balance = awb;
   err = Sentry_Stream_Set(factory->stream, kRegCameraConfig1, camera_config1.camera_reg_value);
-  return err;
-}
-
-sentry_camera_zoom_e SentryFactory_CameraGetZoom(SentryFactory *factory)
-{
-  sentry_camera_conf1_t camera_config1;
-  Sentry_Stream_Get(factory->stream, kRegCameraConfig1, &camera_config1.camera_reg_value);
-  return camera_config1.zoom;
-}
-
-sentry_camera_white_balance_e SentryFactory_CameraGetAwb(SentryFactory *factory)
-{
-  sentry_camera_conf1_t camera_config1;
-  Sentry_Stream_Get(factory->stream, kRegCameraConfig1, &camera_config1.camera_reg_value);
-  return camera_config1.white_balance;
-}
-
-int SentryFactory_CameraGetRotate(SentryFactory *factory)
-{
-  sentry_camera_conf1_t camera_config1;
-  Sentry_Stream_Get(factory->stream, kRegCameraConfig1, &camera_config1.camera_reg_value);
-  return camera_config1.rotate;
-}
-
-sentry_camera_fps_e SentryFactory_CameraGetFPS(SentryFactory *factory)
-{
-  sentry_camera_conf1_t camera_config1;
-  Sentry_Stream_Get(factory->stream, kRegCameraConfig1, &camera_config1.camera_reg_value);
-  return camera_config1.fps;
-}
-
-// Uart functions
-uint8_t SentryFactory_UartSetBaudrate(SentryFactory *factory, sentry_baudrate_e baud)
-{
-  sentry_err_t err;
-  sentry_uart_conf_t uart_config;
-  err = Sentry_Stream_Get(factory->stream, kRegUart, &uart_config.uart_reg_value);
-  if (uart_config.baudrate != baud)
-  {
-    uart_config.baudrate = baud;
-    Sentry_Stream_Set(factory->stream, kRegUart, uart_config.uart_reg_value);
-  }
-  return err;
-}
-
-uint8_t SentryFactory_Snapshot(SentryFactory *factory, uint8_t image_dest,
-                               sentry_snapshot_src_e image_src,
-                               sentry_snapshot_type_e image_type)
-{
-  sentry_err_t err;
-  sentry_snapshot_conf_t reg;
-
-  if (factory->mode != kSerialMode)
-  {
-    return SENTRY_FAIL;
-  }
-
-  err = Sentry_Stream_Get(factory->stream, kRegSnapshot, &reg.value);
-  if (err)
-  {
-    return err;
-  }
-  reg.value &= 0xF0;
-  reg.value |= image_dest;
-  reg.source = image_src;
-  reg.image_type = image_type;
-
-  err = Sentry_Stream_Set(factory->stream, kRegSnapshot, reg.value);
-
-  return err;
-}
-
-// Screen functions
-uint8_t SentryFactory_UserImageCoordinateConfig(SentryFactory *factory, uint8_t image_id,
-                                                uint16_t x_value,
-                                                uint16_t y_value,
-                                                uint16_t width,
-                                                uint16_t height)
-{
-  sentry_err_t err;
-
-  err = Sentry_Stream_Set(factory->stream, kRegImageID, image_id);
-  if (err)
-    return err;
-  err = Sentry_Stream_Set(factory->stream, kRegImageXL, x_value & 0xFF);
-  if (err)
-    return err;
-  err = Sentry_Stream_Set(factory->stream, kRegImageXH, (x_value >> 8) & 0xFF);
-  if (err)
-    return err;
-  err = Sentry_Stream_Set(factory->stream, kRegImageYL, y_value & 0xFF);
-  if (err)
-    return err;
-  err = Sentry_Stream_Set(factory->stream, kRegImageYH, (y_value >> 8) & 0xFF);
-  if (err)
-    return err;
-  err = Sentry_Stream_Set(factory->stream, kRegImageWidthL, width & 0xFF);
-  if (err)
-    return err;
-  err = Sentry_Stream_Set(factory->stream, kRegImageWidthH, (width >> 8) & 0xFF);
-  if (err)
-    return err;
-  err = Sentry_Stream_Set(factory->stream, kRegImageHeightL, height & 0xFF);
-  if (err)
-    return err;
-  err = Sentry_Stream_Set(factory->stream, kRegImageHeightH, (height >> 8) & 0xFF);
-
-  return err;
-}
-
-uint8_t SentryFactory_ScreenConfig(SentryFactory *factory, int enable, int only_user_image)
-{
-  sentry_err_t err;
-  sentry_screen_conf_t reg;
-
-  reg.enable = enable;
-  reg.only_user_image = only_user_image;
-  err = Sentry_Stream_Set(factory->stream, kRegScreenConfig, reg.value);
-
-  return err;
-}
-
-uint8_t SentryFactory_ScreenShow(SentryFactory *factory, uint8_t image_id, uint8_t auto_reload)
-{
-  sentry_err_t err;
-  sentry_image_conf_t reg;
-
-  err = Sentry_Stream_Set(factory->stream, kRegImageID, image_id);
-  if (err)
-    return err;
-  do
-  {
-    /* Waiting for screen to be ready */
-    err = Sentry_Stream_Get(factory->stream, kRegImageConfig, &reg.value);
-    if (err)
-      return err;
-  } while (reg.ready);
-  reg.show = 1;
-  reg.source = 1;
-  reg.ready = 1;
-  reg.auto_reload = auto_reload;
-  err = Sentry_Stream_Set(factory->stream, kRegImageConfig, reg.value);
-
-  return err;
-}
-
-uint8_t SentryFactory_ScreenShowFromFlash(SentryFactory *factory, uint8_t image_id,
-                                          uint8_t auto_reload)
-{
-  sentry_err_t err;
-  sentry_image_conf_t reg;
-
-  err = Sentry_Stream_Set(factory->stream, kRegImageID, image_id);
-  if (err)
-    return err;
-  do
-  {
-    /* Waiting for screen to be ready */
-    err = Sentry_Stream_Get(factory->stream, kRegImageConfig, &reg.value);
-    if (err)
-      return err;
-  } while (reg.ready);
-  reg.show = 1;
-  reg.source = 0;
-  reg.ready = 1;
-  reg.auto_reload = auto_reload;
-  err = Sentry_Stream_Set(factory->stream, kRegImageConfig, reg.value);
-
-  return err;
-}
-
-uint8_t SentryFactory_ScreenFill(SentryFactory *factory, uint8_t image_id, uint8_t r, uint8_t g,
-                                 uint8_t b, uint8_t auto_reload)
-{
-  sentry_err_t err;
-  sentry_image_conf_t reg;
-
-  err = Sentry_Stream_Set(factory->stream, kRegImageID, image_id);
-  if (err)
-    return err;
-  err = Sentry_Stream_Set(factory->stream, kRegScreenFillR, r);
-  if (err)
-    return err;
-  err = Sentry_Stream_Set(factory->stream, kRegScreenFillG, g);
-  if (err)
-    return err;
-  err = Sentry_Stream_Set(factory->stream, kRegScreenFillB, b);
-  if (err)
-    return err;
-  do
-  {
-    /* Waiting for screen to be ready */
-    err = Sentry_Stream_Get(factory->stream, kRegImageConfig, &reg.value);
-    if (err)
-      return err;
-  } while (reg.ready);
-  reg.show = 1;
-  reg.source = 2;
-  reg.ready = 1;
-  reg.auto_reload = auto_reload;
-  err = Sentry_Stream_Set(factory->stream, kRegImageConfig, reg.value);
-
   return err;
 }

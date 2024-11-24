@@ -19,7 +19,6 @@
 #include "sentry_uart.h"
 
 typedef struct {
-    uint8_t address;
     uint8_t device_id;
     int vision_max_type;
     int vision_qrcode_type;
@@ -57,23 +56,9 @@ int SentryFactory_GetParamNum(SentryFactory *factory, int vision_type);
 
 uint8_t SentryFactory_SetParamNum(SentryFactory *factory, int vision_type, int max_num);
 
-const sentry_vision_state_t *SentryFactory_GetVisionState(SentryFactory *factory, int vision_type);
-
-uint8_t SentryFactory_SetVisionState(SentryFactory *factory, int vision_type, sentry_vision_state_t *state);
-
-uint8_t SentryFactory_VisionSetStatus(SentryFactory *factory, int vision_type, int enable);
-
 uint8_t SentryFactory_VisionSetDefault(SentryFactory *factory, int vision_type);
 
-int SentryFactory_VisionGetStatus(SentryFactory *factory, int vision_type);
-
 uint8_t SentryFactory_VisionSetMode(SentryFactory *factory, int vision_type, int mode);
-
-uint8_t SentryFactory_VisionGetMode(SentryFactory *factory, int vision_type, int *mode);
-
-uint8_t SentryFactory_VisionSetLevel(SentryFactory *factory, int vision_type, sentry_vision_level_e level);
-
-uint8_t SentryFactory_VisionGetLevel(SentryFactory *factory, int vision_type, sentry_vision_level_e *level);
 
 uint8_t SentryFactory_SensorSetRestart(SentryFactory *factory);
 
@@ -86,33 +71,6 @@ uint8_t SentryFactory_SensorLockReg(SentryFactory *factory, int lock);
 uint8_t SentryFactory_LedSetColor(SentryFactory *factory, sentry_led_color_e detected_color,
                                   sentry_led_color_e undetected_color, uint8_t level);
 
-uint8_t SentryFactory_CameraSetZoom(SentryFactory *factory, sentry_camera_zoom_e zoom);
-
 uint8_t SentryFactory_CameraSetAwb(SentryFactory *factory, sentry_camera_white_balance_e awb);
-
-sentry_camera_zoom_e SentryFactory_CameraGetZoom(SentryFactory *factory);
-
-sentry_camera_white_balance_e SentryFactory_CameraGetAwb(SentryFactory *factory);
-
-int SentryFactory_CameraGetRotate(SentryFactory *factory);
-
-sentry_camera_fps_e SentryFactory_CameraGetFPS(SentryFactory *factory);
-
-uint8_t SentryFactory_UartSetBaudrate(SentryFactory *factory, sentry_baudrate_e baud);
-
-uint8_t SentryFactory_Snapshot(SentryFactory *factory, uint8_t image_dest,
-                               sentry_snapshot_src_e image_src, sentry_snapshot_type_e image_type);
-
-uint8_t SentryFactory_UserImageCoordinateConfig(SentryFactory *factory, uint8_t image_id,
-                                                uint16_t x_value, uint16_t y_value,
-                                                uint16_t width, uint16_t height);
-
-uint8_t SentryFactory_ScreenConfig(SentryFactory *factory, int enable, int only_user_image);
-
-uint8_t SentryFactory_ScreenShow(SentryFactory *factory, uint8_t image_id, uint8_t auto_reload);
-
-uint8_t SentryFactory_ScreenShowFromFlash(SentryFactory *factory, uint8_t image_id, uint8_t auto_reload);
-
-uint8_t SentryFactory_ScreenFill(SentryFactory *factory, uint8_t image_id, uint8_t r, uint8_t g, uint8_t b, uint8_t auto_reload);
 
 #endif // SENTRY_FACTORY_H
