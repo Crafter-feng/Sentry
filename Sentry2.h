@@ -22,10 +22,12 @@
 class Sentry2
 {
 public:
+    sentry_method_base_t method_base;
     Sentry2(uint8_t address = 0x60)
     {
+        method_base.address = address;
         SentryFactory_Init(&factory, address, SENTRY2_DEVICE_ID, product_vision_state_,
-                           int(kVisionMaxType), int(kVisionQrCode));
+                           int(kVisionMaxType), int(kVisionQrCode), method_base);
     }
     virtual ~Sentry2() {}
     Sentry2(const Sentry2 &) = delete;

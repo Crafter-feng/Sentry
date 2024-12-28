@@ -32,7 +32,7 @@ typedef struct {
 
 void SentryFactory_Init(SentryFactory *factory, uint8_t address, uint8_t device_id,
                         sentry_vision_state_t **vision_state, int vision_max_type,
-                        int vision_qrcode_type);
+                        int vision_qrcode_type, sentry_method_base_t base);
 
 void SentryFactory_Free(SentryFactory *factory);
 

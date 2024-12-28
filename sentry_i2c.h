@@ -16,6 +16,6 @@
 #define SENTRY_I2C_H_
 #include "sentry_stream_base.h"
 
-void sentry_i2c_init(sentry_stream_base_t *stream);
+void sentry_i2c_init(sentry_stream_method_t *stream);
 
 #endif /* SENTRY_I2C_H_ */

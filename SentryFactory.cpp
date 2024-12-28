@@ -38,17 +38,15 @@ int SentryFactory_FreeVisionBuffer(SentryFactory *factory, int vision_type)
 
 void SentryFactory_Init(SentryFactory *factory, uint8_t address, uint8_t device_id,
                         sentry_vision_state_t **vision_state, int vision_max_type,
-                        int vision_qrcode_type)
+                        int vision_qrcode_type, sentry_method_base_t base)
 {
+  memset(factory, 0, sizeof(SentryFactory));
   factory->device_id = device_id;
   factory->vision_max_type = vision_max_type;
   factory->vision_qrcode_type = vision_qrcode_type;
   factory->vision_state = vision_state;
-  factory->stream.address = address;
+  factory->stream.base = base;
   factory->mode = kUnknownMode;
-  factory->img_w = 0;
-  factory->img_h = 0;
-  factory->qrcode_state = NULL;
 }
 
 void SentryFactory_Free(SentryFactory *factory)
@@ -150,11 +148,21 @@ uint8_t SentryFactory_Begin(SentryFactory *factory, sentry_mode_e mode, int set_
   }
   else if (mode == kSerialMode)
   {
-    sentry_uart_init(&factory->stream.base);
+    if (factory->stream.base.serial_read == NULL || factory->stream.base.serial_write == NULL)
+    {
+      return SENTRY_FAIL;
+    }
+    
+    sentry_uart_init(&factory->stream.method);
   }
   else if (mode == kI2CMode)
   {
-    sentry_i2c_init(&factory->stream.base);
+    if (factory->stream.base.i2c_read == NULL || factory->stream.base.i2c_write == NULL)
+    {
+      return SENTRY_FAIL;
+    }
+    
+    sentry_i2c_init(&factory->stream.method);
   }
 
   err = SentryFactory_SensorInit(factory, set_default);

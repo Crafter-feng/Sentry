@@ -17,7 +17,7 @@
 #include "sentry_stream_base.h"
 
 // 初始化函数
-void sentry_uart_init(sentry_stream_base_t* stream);
+void sentry_uart_init(sentry_stream_method_t* stream);
 
 
 #endif /* SENTRY_UART_H_ */
