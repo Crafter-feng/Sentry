@@ -14,7 +14,7 @@
 
 #ifndef SENTRY_UART_H_
 #define SENTRY_UART_H_
-#include "sentry_stream.h"
+#include "sentry_stream_base.h"
 
 // 初始化函数
 void sentry_uart_init(sentry_stream_base_t* stream);

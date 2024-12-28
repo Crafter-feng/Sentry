@@ -14,8 +14,11 @@
 
 #ifndef SENTRY_STREAM_H
 #define SENTRY_STREAM_H
+
+#define SENTRY_MICRO_BIT 1
+
 #include "sentry_type.h"
-#include "debug_tool.h"
+#include "debug/debug_tool.h"
 
 typedef struct
 {
