@@ -142,7 +142,6 @@ static int writepkg(pkg_t *pkg) {
 // 实现函数
 static sentry_err_t sentry_uart_get(uint8_t address, const uint8_t reg_address, uint8_t *value) {
   uint8_t try_time = 0;
-
   for (;;) {
     pkg_t pkg = { 3, { address, SENTRY_PROTOC_COMMADN_GET, reg_address } };
 
@@ -171,7 +170,6 @@ static sentry_err_t sentry_uart_get(uint8_t address, const uint8_t reg_address, 
 
 static sentry_err_t sentry_uart_set(uint8_t address, const uint8_t reg_address, const uint8_t value) {
   uint8_t try_time = 0;
-
   for (;;) {
     pkg_t pkg = { 4, { address, SENTRY_PROTOC_COMMADN_SET, reg_address, value } };
 

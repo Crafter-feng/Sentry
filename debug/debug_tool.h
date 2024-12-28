@@ -7,7 +7,7 @@
 #define LOG_OUTPUT 0
 
 #if !defined(SENTRY_DEBUG_ENABLE)
-#define SENTRY_DEBUG_ENABLE 0
+#define SENTRY_DEBUG_ENABLE 1
 #endif
 
 #if SENTRY_DEBUG_ENABLE != 0
