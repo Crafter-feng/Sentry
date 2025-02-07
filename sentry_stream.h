@@ -54,5 +54,13 @@ typedef struct
 #define Sentry_Stream_ReadQrCode(stream_, vision_type, qrcode) stream_.method.ReadQrCode(&(stream_.base), vision_type, qrcode)
 #define Sentry_Stream_Write(stream_, vision_type, vision_state) stream_.method.Write(&(stream_.base), vision_type, vision_state)
 
+
+// 初始化函数
+
+void sentry_i2c_init(sentry_stream_method_t *stream);
+
+void sentry_uart_init(sentry_stream_method_t* stream);
+
+
 #endif
 
