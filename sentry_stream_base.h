@@ -22,6 +22,7 @@
 
 typedef struct sentry_method_base_t
 {
+    void* user;
     uint8_t address;
     int (*serial_read)(struct sentry_method_base_t *base, uint8_t *pkg_b, int len);
     void (*serial_write)(struct sentry_method_base_t *base, const uint8_t *pkg_b, int len);
