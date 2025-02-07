@@ -14,6 +14,9 @@
 
 #ifndef SENTRY_FACTORY_H_
 #define SENTRY_FACTORY_H_
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include "sentry_stream.h"
 
@@ -71,5 +74,9 @@ uint8_t SentryFactory_LedSetColor(SentryFactory *factory, sentry_led_color_e det
                                   sentry_led_color_e undetected_color, uint8_t level);
 
 uint8_t SentryFactory_CameraSetAwb(SentryFactory *factory, sentry_camera_white_balance_e awb);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // SENTRY_FACTORY_H

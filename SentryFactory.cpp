@@ -1,5 +1,9 @@
 #include "SentryFactory.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int SentryFactory_MallocVisionBuffer(SentryFactory *factory, int vision_type)
 {
   if (vision_type && vision_type < factory->vision_max_type)
@@ -605,3 +609,7 @@ uint8_t SentryFactory_CameraSetAwb(SentryFactory *factory, sentry_camera_white_b
   err = Sentry_Stream_Set(factory->stream, kRegCameraConfig1, camera_config1.camera_reg_value);
   return err;
 }
+
+#ifdef __cplusplus
+}
+#endif

@@ -1,5 +1,9 @@
 #include "sentry_stream.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 static sentry_err_t sentry_i2c_get(struct sentry_method_base_t * base, const uint8_t reg_address, uint8_t *value)
 {
   return base->i2c_read(base, reg_address, value);
@@ -660,5 +664,7 @@ void sentry_uart_init(sentry_stream_method_t *method)
 }
 
 
-
+#ifdef __cplusplus
+}
+#endif
 

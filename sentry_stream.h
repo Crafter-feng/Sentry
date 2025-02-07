@@ -15,7 +15,10 @@
 #ifndef SENTRY_STREAM_H
 #define SENTRY_STREAM_H
 
-#define SENTRY_MICRO_BIT 1
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 
 #include "sentry_type.h"
 #include "debug/debug_tool.h"
@@ -62,5 +65,8 @@ void sentry_i2c_init(sentry_stream_method_t *stream);
 void sentry_uart_init(sentry_stream_method_t* stream);
 
 
+#ifdef __cplusplus
+}
+#endif
 #endif
 
