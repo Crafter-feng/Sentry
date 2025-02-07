@@ -15,8 +15,7 @@
 #ifndef SENTRY_FACTORY_H_
 #define SENTRY_FACTORY_H_
 
-#include "sentry_i2c.h"
-#include "sentry_uart.h"
+#include "sentry_stream.h"
 
 typedef struct {
     uint8_t device_id;
