@@ -21,7 +21,7 @@ extern "C" {
 
 
 #include "sentry_type.h"
-#include "debug/debug_tool.h"
+#include "debug_tool.h"
 
 typedef struct sentry_method_base_t
 {
